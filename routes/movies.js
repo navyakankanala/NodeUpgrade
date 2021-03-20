@@ -1,164 +1,55 @@
-var express=require('express');
-var router=express.Router();
-var axios=require('axios');
+var express = require('express');
+var router = express.Router();
+var axios = require('axios');
+var movieService = require('../services/movieServices');
+var CB=require('../circuit-breaker');
 
-router.get('/', function(req, res, next) {
-    axios.get("https://api.themoviedb.org/3/movie/now_playing?api_key=27cf50a818f5b0ecdb3d4f79b45dea46&language=en-US&page=1"
-    
-    ).then(response => res.send(response.data))
-    .catch((error) => {
-    console.error(error)
-    })
+const movie = movieService.getmovie;
+const page = movieService.getpage;
+const date = movieService.getdate;
+const popularity = movieService.getpopularity;
+const rating = movieService.getrate;
+const genre = movieService.getgenres;
+const dp = movieService.getAll;
+
+
+   router.get('/', CB , function(req, res, next) 
+   {
+         movie(req,res);
     });
 
    
-    router.get('/page', function(req, res, next) {
-        var page = req.headers['page'];
-        axios.get("https://api.themoviedb.org/3/movie/now_playing?api_key=27cf50a818f5b0ecdb3d4f79b45dea46&language=en-US"+"&page="+page)
-        .then(response => res.send(response.data))
-        .catch((error) => {
-        console.error(error)
-        })
-        });
+    router.get('/page', CB , function(req, res, next)
+     {
+         page(req,res);
+        
+     });
 
-        router.get('/date', function(req, res, next) {
-            var date=req.headers['date']
-           console.log(res);
-            var sam1=[];
-            axios.get("https://api.themoviedb.org/3/movie/now_playing?api_key=27cf50a818f5b0ecdb3d4f79b45dea46&language=en-US"
-            ).then(response => {
-               // var sam1=response.data.results.filter(result => (result.release_date == date));
-                this.response = response.data
-                var sam=response.data.results
-               sam.forEach(element => { 
-                   if(element.release_date==date){
-                      sam1.push(element)
-                       }
-              });
-              res.send(sam1);
-            })
-            .catch((error) => {
-            console.error(error)
-            })
-        });  
+    router.get('/date', CB , function(req, res, next)
+     {
+         date(req,res);
+     });  
         
         
-        router.get('/popularity', function(req, res, next) {
+    router.get('/popularity', CB ,  function(req, res, next)
+    {
+          popularity(req,res);
             
-            var popularity=req.headers['popularity']
-           console.log(res);
-            var sam1=[];
-            axios.get("https://api.themoviedb.org/3/movie/now_playing?api_key=27cf50a818f5b0ecdb3d4f79b45dea46&language=en-US"
-            ).then(response => {
-                //var sam1=response.data.results.filter(result => (result.popularity <= popularity));
-                this.response = response.data
-               var sam=response.data.results
-               
-               sam.forEach(element => { 
-                   if(element.popularity<=popularity){
-                      sam1.push(element)
-                       }
-              });
-              res.send(sam1);
-            })
-            .catch((error) => {
-            console.error(error)
-            })
-        });        
+    });        
 
+    router.get('/rating',  CB , function(req, res, next)
+    {
+         rating(req,res);
+    });
+    
+    router.get('/genre',  CB , function(req, res, next) 
+    {
+         genre(req,res);
+     });
 
-        // router.get('/genre', function(req, res, next) {
-            
-        //    var genres1=req.headers['genres1']
-        //    var genres2=req.headers['genres2']
-        //    //console.log(res);
-        //     var sam1=[];
-        //     axios.get("https://api.themoviedb.org/3/genre/movie/list?api_key=27cf50a818f5b0ecdb3d4f79b45dea46&language=en-US"
-        //     ).then(response => {
-        //         this.response = response.data
-        //         console.log(response.data.genres)
-        //         var sam=response.data.genres
-        //        sam.forEach(element => { 
-        //            if(element.name==genres1||element.name==genres2){
-        //               sam1.push(element)
-        //                }
-        //       });
-        //       res.send(sam1);
-        //     })
-        //     .catch((error) => {
-        //     console.error(error)
-        //     })
-        // });        
+     router.get('/all',  CB , function(req, res, next) 
+    {
+         dp(req,res);
+     });
 
-
-        router.get('/rating', function(req, res, next) {
- 
-            var rating=req.headers['rating']
-            console.log(res);
-            var sam1=[];
-            axios.get("https://api.themoviedb.org/3/movie/now_playing?api_key=27cf50a818f5b0ecdb3d4f79b45dea46&language=en-US"
-            ).then(response => {
-            this.response = response.data
-            var sam=response.data.results
-            sam.forEach(element => { 
-            if(element.vote_average>=rating){
-            sam1.push(element)
-            }
-            });
-            res.send(sam1);
-            })
-            .catch((error) => {
-            console.error(error)
-            })
-            });
-            
-
-            router.get('/genre', function(req, res, next) {
-                var name=req.headers.genre;
-                var name1=name.split(",");//spliied to save as array
-               //console.log(name1);
-                Promise.all([
-                    axios.get('https://api.themoviedb.org/3/movie/now_playing?api_key=27cf50a818f5b0ecdb3d4f79b45dea46&language=en-US'),
-                    axios.get('https://api.themoviedb.org/3/genre/movie/list?api_key=27cf50a818f5b0ecdb3d4f79b45dea46&language=en-US')
-                ]).then(function (responses) {
-                    // Get a JSON object from each of the responses
-                    return Promise.all(responses.map(function (response) {
-                        //console.log(res.send(response.data));
-                            return response.data;    
-                    }));// taking into singal array
-                }).then(function (data) {
-                    var sam=[];// based on  input header from line number 118  fecthing genre names and ids
-                    data[1].genres.filter(result =>name1.forEach(element=>{
-                            if(element==result.name){
-                                sam.push(result);
-                            }
-                    }));
-                    console.log(sam)
-                    var sam1=[];//fetching ids from sam
-                    sam.forEach(element=>{
-                        sam1.push(element.id);
-                    })
-                    
-                    console.log(sam1)
-            
-                 var sam3=[];//fecting movie list using genre_ids which is comnig from sam1..
-                data[0].results.filter(element=>{
-                    for(var i=0;i<element.genre_ids.length;i++){
-                    if(sam1.indexOf(element.genre_ids[i])!=-1){
-                    sam3.push(element);
-                     break;
-                     }
-                    //else{
-                    //     result=[];
-                    // }
-                    }
-                    })
-                    console.log(sam3);
-                    res.send(sam3);
-                }).catch(function (error) {
-                    // if there's an error, log it
-                    console.log(error);
-                });
-                });
-
-    module.exports=router;
+    module.exports = router;
