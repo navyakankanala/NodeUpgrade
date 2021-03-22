@@ -143,6 +143,7 @@ function getAll(req,res){
                 var name = req.headers.genre;
                 var name1 = name.split(",");//spliied to save as array
                 var popularity = req.headers['popularity'];
+                var date = req.headers['date'];
                //console.log(name1);
                 Promise.all([
                     axios.get(links.moviesLink),
@@ -156,8 +157,8 @@ function getAll(req,res){
                 }).then(function (data) {
                     // var sample=data[0].results.filter(result=>result.popularity<=popularity);
                     // console.log(sample);
-                    if(name1 == "" && popularity == ""){
-                        res.send(data[0])
+                    if(name1 == "" ){
+                        sam3=data[0].results;
                     }else{
                         var sam = [];// based on  input header from line number 118  fecthing genre names and ids
                     data[1].genres.filter(result => name1.forEach(element => {
@@ -186,14 +187,32 @@ function getAll(req,res){
                     // }
                     }
                     })
-                   // console.log(sam3);
-                    res.send(sam3);
-                    }
                     
-                }).catch(function (error) {
-                    // if there's an error, log it
-                    console.log(error);
-                });
+                   // console.log(sam3);
+                    //res.send(sam3);
+                    }
+                    if(popularity=="")
+                    sam5=sam3;
+                    else{
+                        var sam5=sam3.filter(result => (result.popularity <= popularity))
+
+                        }
+                    if(date=="")
+                    {
+                         sam6=sam5;
+                        //console.log("entered")
+                     }
+                        else{
+                             var sam6=sam5.filter(result => (result.release_date == date))
+ 
+                            }
+                                res.send(sam6)
+                     }).catch(function (error) {
+                     // if there's an error, log it
+                            console.log(error);
+                    });
+                    
+               
      
 }
 module.exports = {
